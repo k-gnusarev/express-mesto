@@ -4,8 +4,8 @@
   "description": "Бэкенд-часть приложения Mesto",
   "main": "app.js",
   "scripts": {
-    "start": "npm run start",
-    "dev": "npm run dev",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
     "lint": "npx eslint"
   },
   "repository": {
