@@ -11,7 +11,7 @@ app.use(express.static(`${__dirname}/public`));
 // временное решение для авторизации
 app.use((req, res, next) => {
   req.user = {
-    _id: '6077e735e5da5329bc86ca57',
+    _id: '60792fba61c606678a3ac3ed',
   };
 
   next();
