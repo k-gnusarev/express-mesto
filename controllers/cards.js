@@ -33,12 +33,17 @@ const createCard = (req, res) => {
 // DELETE /cards/:cardId — удаляет карточку по идентификатору
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.id)
+    .orFail(new Error(ERROR_404_NAME))
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === ERROR_404_NAME) {
-        return res.status(404).send({ message: ERROR_404_CARD_MESSAGE });
+      switch (err.name) {
+        case ERROR_400_NAME:
+          return res.status(400).send({ message: ERROR_400_MESSAGE });
+        case ERROR_404_NAME:
+          return res.status(404).send({ message: ERROR_404_CARD_MESSAGE });
+        default:
+          return res.status(500).send({ message: ERROR_500_MESSAGE });
       }
-      return res.send({ message: ERROR_500_MESSAGE });
     });
 };
 
@@ -49,12 +54,17 @@ const likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
+    .orFail(new Error(ERROR_404_NAME))
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === ERROR_400_NAME) {
-        return res.status(400).send({ message: ERROR_400_MESSAGE });
+      switch (err.name) {
+        case ERROR_400_NAME:
+          return res.status(400).send({ message: ERROR_400_MESSAGE });
+        case ERROR_404_NAME:
+          return res.status(404).send({ message: ERROR_404_CARD_MESSAGE });
+        default:
+          return res.status(500).send({ message: ERROR_500_MESSAGE });
       }
-      return res.status(500).send({ message: ERROR_500_MESSAGE });
     });
 };
 
@@ -65,12 +75,17 @@ const unlikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
+    .orFail(new Error(ERROR_404_NAME))
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === ERROR_400_NAME) {
-        return res.status(400).send({ message: ERROR_400_MESSAGE });
+      switch (err.name) {
+        case ERROR_400_NAME:
+          return res.status(400).send({ message: ERROR_400_MESSAGE });
+        case ERROR_404_NAME:
+          return res.status(404).send({ message: ERROR_404_CARD_MESSAGE });
+        default:
+          return res.status(500).send({ message: ERROR_500_MESSAGE });
       }
-      return res.status(500).send({ message: ERROR_500_MESSAGE });
     });
 };
 

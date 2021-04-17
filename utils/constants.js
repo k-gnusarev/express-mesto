@@ -1,6 +1,6 @@
 /* eslint-disable linebreak-style */
-const ERROR_400_NAME = 'ValidationError';
-const ERROR_404_NAME = 'CastError';
+const ERROR_400_NAME = 'CastError';
+const ERROR_404_NAME = 'NotValidId';
 const ERROR_400_MESSAGE = 'Переданы некорректные данные.';
 const ERROR_404_USER_MESSAGE = 'Пользователь по указанному _id не найден.';
 const ERROR_404_CARD_MESSAGE = 'Карточка по указанному id не найдена.';

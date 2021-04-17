@@ -18,6 +18,7 @@ const getUsers = (req, res) => {
 // GET /users/:userId - возвращает пользователя по _id
 const getUser = (req, res) => {
   User.findById(req.params.id)
+    .orFail(new Error(ERROR_404_NAME))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === ERROR_404_NAME) {
@@ -45,7 +46,7 @@ const createUser = (req, res) => {
 const updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { avatar })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { runValidators: true, new: true })
     .then((user) => res.send(user.avatar))
     .catch((err) => {
       if (err.name === ERROR_400_NAME) {
@@ -59,19 +60,18 @@ const updateUserAvatar = (req, res) => {
 const updateUserInfo = (req, res) => {
   const { name, about } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { name, about })
-    .then((user) => {
-      if (!user) {
-        return res.status(404).send({ message: ERROR_404_USER_MESSAGE });
-      }
-      return res.send(user);
-    })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { runValidators: true, new: true })
+    .orFail(new Error(ERROR_404_NAME))
+    .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === ERROR_400_NAME) {
-        return res.status(400).send({ message: ERROR_400_MESSAGE });
+      switch (err.name) {
+        case ERROR_400_NAME:
+          return res.status(400).send({ message: ERROR_400_MESSAGE });
+        case ERROR_404_NAME:
+          return res.status(404).send({ message: ERROR_404_USER_MESSAGE });
+        default:
+          return res.status(500).send({ message: ERROR_500_MESSAGE });
       }
-
-      return res.status(500).send({ message: ERROR_500_MESSAGE });
     });
 };
 
