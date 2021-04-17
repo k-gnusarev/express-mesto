@@ -1,27 +1,48 @@
 /* eslint-disable linebreak-style */
 const Card = require('../models/card');
+const {
+  ERROR_400_NAME,
+  ERROR_404_NAME,
+  ERROR_400_MESSAGE,
+  ERROR_404_CARD_MESSAGE,
+  ERROR_500_MESSAGE,
+} = require('../utils/constants');
 
+// GET /cards — возвращает все карточки
 const getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(200).send(cards))
-    .catch((err) => res.send({ message: err.message }));
+    .then((cards) => res.send(cards))
+    .catch(() => res.status(500).send({ message: ERROR_500_MESSAGE }));
 };
 
+// POST /cards — создаёт карточку
 const createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
     .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === ERROR_400_NAME) {
+        return res.status(400).send({ message: ERROR_400_MESSAGE });
+      }
+      return res.status(500).send({ message: ERROR_500_MESSAGE });
+    });
 };
 
+// DELETE /cards/:cardId — удаляет карточку по идентификатору
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.id)
     .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === ERROR_404_NAME) {
+        return res.status(404).send({ message: ERROR_404_CARD_MESSAGE });
+      }
+      return res.send({ message: ERROR_500_MESSAGE });
+    });
 };
 
+// PUT /cards/:cardId/likes — поставить лайк карточке
 const likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.id,
@@ -29,9 +50,15 @@ const likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === ERROR_400_NAME) {
+        return res.status(400).send({ message: ERROR_400_MESSAGE });
+      }
+      return res.status(500).send({ message: ERROR_500_MESSAGE });
+    });
 };
 
+// DELETE /cards/:cardId/likes — убрать лайк с карточки
 const unlikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.id,
@@ -39,7 +66,12 @@ const unlikeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === ERROR_400_NAME) {
+        return res.status(400).send({ message: ERROR_400_MESSAGE });
+      }
+      return res.status(500).send({ message: ERROR_500_MESSAGE });
+    });
 };
 
 module.exports = {
