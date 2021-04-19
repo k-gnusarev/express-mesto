@@ -18,13 +18,16 @@ const getUsers = (req, res) => {
 // GET /users/:userId - возвращает пользователя по _id
 const getUser = (req, res) => {
   User.findById(req.params.id)
-    .orFail(new Error(ERROR_404_NAME))
-    .then((user) => res.send(user))
+    .orFail(new Error(ERROR_404_NAME, ERROR_404_USER_MESSAGE))
+    .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === ERROR_404_NAME) {
-        return res.status(404).send({ message: ERROR_404_USER_MESSAGE });
+      if (err.message === ERROR_404_NAME) {
+        res.status(404).send({ message: ERROR_404_USER_MESSAGE });
+      } else if (err.name === ERROR_400_NAME) {
+        res.status(400).send({ message: ERROR_400_MESSAGE });
+      } else {
+        res.status(500).send({ message: ERROR_500_MESSAGE });
       }
-      return res.send({ message: ERROR_500_MESSAGE });
     });
 };
 

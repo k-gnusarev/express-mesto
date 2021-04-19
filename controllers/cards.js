@@ -36,13 +36,12 @@ const deleteCard = (req, res) => {
     .orFail(new Error(ERROR_404_NAME))
     .then((card) => res.send(card))
     .catch((err) => {
-      switch (err.name) {
-        case ERROR_400_NAME:
-          return res.status(400).send({ message: ERROR_400_MESSAGE });
-        case ERROR_404_NAME:
-          return res.status(404).send({ message: ERROR_404_CARD_MESSAGE });
-        default:
-          return res.status(500).send({ message: ERROR_500_MESSAGE });
+      if (err.message === ERROR_404_NAME) {
+        res.status(404).send({ message: ERROR_404_CARD_MESSAGE });
+      } else if (err.name === ERROR_400_NAME) {
+        res.status(400).send({ message: ERROR_400_MESSAGE });
+      } else {
+        res.status(500).send({ message: ERROR_500_MESSAGE });
       }
     });
 };
@@ -52,18 +51,17 @@ const likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.id,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
-    { new: true },
+    { runValidators: true, new: true },
   )
-    .orFail(new Error(ERROR_404_NAME))
+    .orFail(new Error(ERROR_404_NAME, ERROR_404_CARD_MESSAGE))
     .then((card) => res.send(card))
     .catch((err) => {
-      switch (err.name) {
-        case ERROR_400_NAME:
-          return res.status(400).send({ message: ERROR_400_MESSAGE });
-        case ERROR_404_NAME:
-          return res.status(404).send({ message: ERROR_404_CARD_MESSAGE });
-        default:
-          return res.status(500).send({ message: ERROR_500_MESSAGE });
+      if (err.message === ERROR_404_NAME) {
+        res.status(404).send({ message: ERROR_404_CARD_MESSAGE });
+      } else if (err.name === ERROR_400_NAME) {
+        res.status(400).send({ message: ERROR_400_MESSAGE });
+      } else {
+        res.status(500).send({ message: ERROR_500_MESSAGE });
       }
     });
 };
@@ -78,13 +76,12 @@ const unlikeCard = (req, res) => {
     .orFail(new Error(ERROR_404_NAME))
     .then((card) => res.send(card))
     .catch((err) => {
-      switch (err.name) {
-        case ERROR_400_NAME:
-          return res.status(400).send({ message: ERROR_400_MESSAGE });
-        case ERROR_404_NAME:
-          return res.status(404).send({ message: ERROR_404_CARD_MESSAGE });
-        default:
-          return res.status(500).send({ message: ERROR_500_MESSAGE });
+      if (err.message === ERROR_404_NAME) {
+        res.status(404).send({ message: ERROR_404_CARD_MESSAGE });
+      } else if (err.name === ERROR_400_NAME) {
+        res.status(400).send({ message: ERROR_400_MESSAGE });
+      } else {
+        res.status(500).send({ message: ERROR_500_MESSAGE });
       }
     });
 };

@@ -1,7 +1,6 @@
 /* eslint-disable linebreak-style */
 const express = require('express');
 const mongoose = require('mongoose');
-const path = require('path');
 const helmet = require('helmet');
 
 const { PORT = 3000 } = process.env;
@@ -9,7 +8,6 @@ const app = express();
 
 // МИДЛВЕРЫ
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 // временное решение для авторизации
 app.use((req, res, next) => {
   req.user = {
@@ -29,7 +27,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
-app.use(helmet);
+app.use(helmet());
 app.disable('x-powered-by');
 
 app.listen(PORT, () => {
