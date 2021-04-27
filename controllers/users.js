@@ -1,4 +1,5 @@
 /* eslint-disable linebreak-style */
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const {
   ERROR_400_NAME,
@@ -33,11 +34,32 @@ const getUser = (req, res) => {
 
 // POST /users — создаёт пользователя
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body; // извлекаем данные из тела запроса
 
-  User.create({ name, about, avatar })
-    .then((user) => res.send(user))
+  // хешируем пароль
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
+    .then((user) => res.send({
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    }))
     .catch((err) => {
+      console.log(err);
       if (err.name === ERROR_400_NAME) {
         return res.status(400).send({ message: ERROR_400_MESSAGE });
       }
