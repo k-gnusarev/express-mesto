@@ -13,14 +13,6 @@ const app = express();
 
 // МИДЛВЕРЫ
 app.use(express.json());
-// временное решение для авторизации
-app.use((req, res, next) => {
-  req.user = {
-    _id: '60792fba61c606678a3ac3ed',
-  };
-
-  next();
-});
 
 // ПОДКЛЮЧЕНИЕ БАЗЫ ДАННЫХ
 mongoose.connect('mongodb://localhost:27017/mestodb', {
@@ -32,6 +24,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
+// роуты, не требующие авторизации
 app.post('/signin', login);
 app.post('/signup', createUser);
 

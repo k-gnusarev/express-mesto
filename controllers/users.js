@@ -106,6 +106,7 @@ const login = (req, res) => {
   const { email, password } = req.body;
 
   User.findOne({ email })
+    .select('+password') // вернуть хеш пароля при авторизации
     .then((user) => {
       if (!user) {
         return Promise.reject(new Error('Неправильные почта или пароль'));
@@ -121,7 +122,7 @@ const login = (req, res) => {
       }
 
       // аутентификация успешна
-      res.send({ message: 'Всё верно!' });
+      res.send({ message: 'Авторизация успешна!' });
     })
     .then((user) => {
       const token = jwt.sign(
