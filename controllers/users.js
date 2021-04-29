@@ -3,39 +3,40 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const {
-  ERROR_400_NAME,
-  ERROR_404_NAME,
-  ERROR_400_MESSAGE,
-  ERROR_404_USER_MESSAGE,
-  ERROR_500_MESSAGE,
-} = require('../utils/constants');
+
+const AuthError = require('../errors/AuthError');
+const ConflictError = require('../errors/ConflictError');
+const NotFoundError = require('../errors/NotFoundError');
+const ValidationError = require('../errors/ValidationError');
+
+function handleErrors(err) {
+  if (err.message === 'NullReturned' || err.name === 'CastError') {
+    throw new NotFoundError(err.message);
+  } else {
+    throw new ValidationError(err.message);
+  }
+}
 
 // GET /users — возвращает всех пользователей
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(500).send({ message: ERROR_500_MESSAGE }));
+    .catch(next);
 };
 
 // GET /users/:userId - возвращает пользователя по _id
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   User.findById(req.params.id)
-    .orFail(new Error(ERROR_404_NAME, ERROR_404_USER_MESSAGE))
+    .orFail(new Error('NullReturned'))
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.message === ERROR_404_NAME) {
-        res.status(404).send({ message: ERROR_404_USER_MESSAGE });
-      } else if (err.name === ERROR_400_NAME) {
-        res.status(400).send({ message: ERROR_400_MESSAGE });
-      } else {
-        res.status(500).send({ message: ERROR_500_MESSAGE });
-      }
-    });
+      throw new NotFoundError(err.message);
+    })
+    .catch(next);
 };
 
 // POST /users — создаёт пользователя
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -61,48 +62,39 @@ const createUser = (req, res) => {
       email: user.email,
     }))
     .catch((err) => {
-      if (err.name === ERROR_400_NAME) {
-        return res.status(400).send({ message: ERROR_400_MESSAGE });
+      if (err.name === 'MongoError' || err.code === 11000) {
+        throw new ConflictError(err.message);
       }
-      return res.status(500).send({ message: ERROR_500_MESSAGE });
-    });
+
+      throw new ValidationError(err.message);
+    })
+    .catch(next);
 };
 
 // PATCH /users/me/avatar — обновляет аватар
-const updateUserAvatar = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { runValidators: true, new: true })
+    .orFail(new Error('NullReturned'))
     .then((user) => res.send(user.avatar))
-    .catch((err) => {
-      if (err.name === ERROR_400_NAME) {
-        return res.status(400).send({ message: ERROR_400_MESSAGE });
-      }
-      return res.status(500).send({ message: ERROR_500_MESSAGE });
-    });
+    .catch((err) => handleErrors(err))
+    .catch(next);
 };
 
 // PATCH /users/me — обновляет профиль
-const updateUserInfo = (req, res) => {
+const updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { runValidators: true, new: true })
-    .orFail(new Error(ERROR_404_NAME))
+    .orFail(new Error('NullReturned'))
     .then((user) => res.send(user))
-    .catch((err) => {
-      switch (err.name) {
-        case ERROR_400_NAME:
-          return res.status(400).send({ message: ERROR_400_MESSAGE });
-        case ERROR_404_NAME:
-          return res.status(404).send({ message: ERROR_404_USER_MESSAGE });
-        default:
-          return res.status(500).send({ message: ERROR_500_MESSAGE });
-      }
-    });
+    .catch((err) => handleErrors(err))
+    .catch(next);
 };
 
 // авторизация пользователя
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findOne({ email })
@@ -143,7 +135,10 @@ const login = (req, res) => {
       )
         .end();
     })
-    .catch((err) => res.status(401).send({ message: err.message }));
+    .catch((err) => {
+      throw new AuthError(err.message);
+    })
+    .catch(next);
 };
 
 module.exports = {

@@ -7,6 +7,7 @@ const {
   login,
 } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/NotFoundError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -32,6 +33,19 @@ app.use(auth);
 
 app.use(helmet());
 app.disable('x-powered-by');
+
+// обработка несуществующего адреса
+app.use('*', () => {
+  throw new NotFoundError('Запрашиваемый ресурс не найден');
+});
+
+// централизованная обработка ошибок
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res.status(err.statusCode).send({ message: statusCode === 500 ? 'Что-то пошло не так' : message });
+
+  next();
+});
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
