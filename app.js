@@ -2,6 +2,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const {
+  createUser,
+  login,
+} = require('./controllers/users');
+const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -26,6 +31,11 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
+
+app.post('/signin', login);
+app.post('/signup', createUser);
+
+app.use(auth);
 
 app.use(helmet());
 app.disable('x-powered-by');

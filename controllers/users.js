@@ -1,4 +1,5 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable consistent-return */
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -120,7 +121,7 @@ const login = (req, res) => {
       }
 
       // аутентификация успешна
-      return res.send({ message: 'Всё верно!' });
+      res.send({ message: 'Всё верно!' });
     })
     .then((user) => {
       const token = jwt.sign(
@@ -137,7 +138,8 @@ const login = (req, res) => {
         // token - наш JWT токен, который мы отправляем
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
-        })
+        },
+      )
         .end();
     })
     .catch((err) => res.status(401).send({ message: err.message }));
