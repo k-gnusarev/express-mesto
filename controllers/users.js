@@ -105,16 +105,15 @@ const login = (req, res, next) => {
       }
 
       // пользователь найден
-      return bcrypt.compare(password, user.password); // проверка соответствия хеша пароля с базой
-    })
-    .then((matched) => {
-      if (!matched) {
-        // хеши не совпали — отклоняем промис
-        return Promise.reject(new Error('Неправильные почта или пароль'));
-      }
+      return bcrypt.compare(password, user.password).then((matched) => {
+        // проверка соответствия хеша пароля с базой
+        if (!matched) {
+          // хеши не совпали — отклоняем промис
+          return Promise.reject(new Error('Неправильные почта или пароль'));
+        }
 
-      // аутентификация успешна
-      res.send({ message: 'Авторизация успешна!' });
+        return user;
+      });
     })
     .then((user) => {
       const token = jwt.sign(
@@ -123,17 +122,8 @@ const login = (req, res, next) => {
         { expiresIn: '7d' },
       );
 
-      // вернём токен
-      res.cookie(
-        'jwt',
-        token,
-        {
-        // token - наш JWT токен, который мы отправляем
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-        },
-      )
-        .end();
+      // выдать токен
+      res.send({ token });
     })
     .catch((err) => {
       throw new AuthError(err.message);
