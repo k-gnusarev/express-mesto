@@ -93,6 +93,17 @@ const updateUserInfo = (req, res, next) => {
     .catch(next);
 };
 
+// GET users/me — выдаёт текущего пользователя
+const getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id) // поиск пользователя
+    .orFail(new Error('NullReturned'))
+    .then((user) => res.send(user))
+    .catch((err) => {
+      throw new NotFoundError(err.message);
+    })
+    .catch(next);
+};
+
 // авторизация пользователя
 const login = (req, res, next) => {
   const { email, password } = req.body;
@@ -137,5 +148,6 @@ module.exports = {
   createUser,
   updateUserInfo,
   updateUserAvatar,
+  getCurrentUser,
   login,
 };

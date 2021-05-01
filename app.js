@@ -9,6 +9,7 @@ const {
 } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { userInfoValidation, loginValidation } = require('./middlewares/requestValidation');
+const NotFoundError = require('./errors/NotFoundError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -30,6 +31,12 @@ app.disable('x-powered-by');
 
 // обработчики ошибок
 app.use(errors());
+
+// запрос несуществующего ресурса
+app.use('*', () => {
+  throw new NotFoundError('Запрашиваемый ресурс не найден');
+});
+
 // централизованная обработка ошибок
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;

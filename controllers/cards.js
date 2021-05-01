@@ -28,8 +28,11 @@ const createCard = (req, res, next) => {
 // DELETE /cards/:cardId — удаляет карточку по идентификатору
 const deleteCard = (req, res, next) => {
   Card.findById(req.params.id)
-    .orFail(new Error('NullReturned'))
     .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Карточка с данным ID не найдена');
+      }
+
       if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError('Вы не можете удалить чужую карточку.');
       }
@@ -39,9 +42,6 @@ const deleteCard = (req, res, next) => {
           res.send(data);
         })
         .catch(next);
-    })
-    .catch((err) => {
-      throw new NotFoundError(err.message);
     })
     .catch(next);
 };
