@@ -28,7 +28,7 @@ const getUsers = (req, res, next) => {
 const getUser = (req, res, next) => {
   User.findById(req.params.id)
     .orFail(new Error('NullReturned'))
-    .then((card) => res.send(card))
+    .then((user) => res.send(user))
     .catch((err) => {
       throw new NotFoundError(err.message);
     })

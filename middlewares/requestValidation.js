@@ -22,7 +22,7 @@ const userInfoValidation = celebrate({
       name: Joi.string().min(2).max(30),
       about: Joi.string().min(2).max(30),
       avatar: Joi.string().custom((value, helpers) => {
-        if (validator.isURL(value, { require_protocol: true, disallow_auth: true })) {
+        if (validator.isURL(value, { require_protocol: true })) {
           return value;
         }
         return helpers.message('Неправильный формат ссылки на аватар');
@@ -46,7 +46,7 @@ const cardValidation = celebrate({
         .string()
         .required()
         .custom((value, helpers) => {
-          if (validator.isURL(value, { require_protocol: true, disallow_auth: true })) {
+          if (validator.isURL(value, { require_protocol: true })) {
             return value;
           }
           return helpers.message('Неправильный формат ссылки на картинку');
@@ -86,14 +86,6 @@ const userInfoUpdateValidation = celebrate({
         .min(2)
         .max(30),
     }),
-  headers: Joi
-    .object()
-    .keys({
-      'content-type': Joi
-        .string()
-        .valid('application/json')
-        .required(),
-    }),
 });
 
 // валидация обновления аватара
@@ -105,19 +97,11 @@ const userAvatarUpdateValidation = celebrate({
         .string()
         .required()
         .custom((value, helpers) => {
-          if (validator.isURL(value, { require_protocol: true, disallow_auth: true })) {
+          if (validator.isURL(value, { require_protocol: true })) {
             return value;
           }
           return helpers.message('Неправильный формат ссылки на аватар');
         }),
-    }),
-  headers: Joi
-    .object()
-    .keys({
-      'content-type': Joi
-        .string()
-        .valid('application/json')
-        .required(),
     }),
 });
 
