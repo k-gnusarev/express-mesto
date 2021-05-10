@@ -9,6 +9,7 @@ const {
 } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { userInfoValidation, loginValidation } = require('./middlewares/requestValidation');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const NotFoundError = require('./errors/NotFoundError');
 
 const { PORT = 3000 } = process.env;
@@ -16,6 +17,7 @@ const app = express();
 
 // МИДЛВЕРЫ
 app.use(express.json());
+app.use(requestLogger);
 
 // роуты, не требующие авторизации
 app.post('/signin', loginValidation, login);
@@ -28,6 +30,8 @@ app.use('/', require('./routes/cards'));
 
 app.use(helmet());
 app.disable('x-powered-by');
+
+app.use(errorLogger); // подключаем логгер ошибок
 
 // обработчики ошибок
 app.use(errors());
